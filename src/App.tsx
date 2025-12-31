@@ -1,35 +1,83 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState, useCallback } from 'react';
+import { v4 as uuidv4 } from 'uuid';
+import ChatWindow from './components/ChatWindow/ChatWindow';
+import ChatInput from './components/ChatInput/ChatInput';
+import apiService from './services/api';
+import type { Message } from './types';
+import 'katex/dist/katex.min.css';
+import './App.css';
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleSendMessage = useCallback(async (content: string) => {
+    const userMessage: Message = {
+      id: uuidv4(),
+      role: 'user',
+      content,
+      timestamp: new Date(),
+    };
+
+    setMessages(prev => [...prev, userMessage]);
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const response = await apiService.sendMessage(content);
+      
+      const assistantMessage: Message = {
+        id: uuidv4(),
+        role: 'assistant',
+        content: response.response,
+        timestamp: new Date(),
+        sources: response.sources,
+        tokens: response.tokens,
+      };
+
+      setMessages(prev => [...prev, assistantMessage]);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'An unexpected error occurred';
+      setError(errorMessage);
+      
+      const errorAssistantMessage: Message = {
+        id: uuidv4(),
+        role: 'assistant',
+        content: `Sorry, I encountered an error: ${errorMessage}. Please try again.`,
+        timestamp: new Date(),
+      };
+
+      setMessages(prev => [...prev, errorAssistantMessage]);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  const handleClearChat = useCallback(() => {
+    setMessages([]);
+    setError(null);
+  }, []);
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <div className="app">
+      {error && (
+        <div className="error-banner">
+          <span>{error}</span>
+          <button onClick={() => setError(null)}>×</button>
+        </div>
+      )}
+      <ChatWindow
+        messages={messages}
+        isLoading={isLoading}
+        onClearChat={handleClearChat}
+      />
+      <ChatInput
+        onSendMessage={handleSendMessage}
+        disabled={isLoading}
+      />
+    </div>
+  );
 }
 
-export default App
+export default App;

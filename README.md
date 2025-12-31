@@ -1,73 +1,122 @@
-# React + TypeScript + Vite
+# RAG Chatbot
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A production-ready **RAG (Retrieval-Augmented Generation) chatbot** with a ChatGPT-like frontend and Python FastAPI backend.
 
-Currently, two official plugins are available:
+![RAG Chatbot](https://img.shields.io/badge/React-TypeScript-blue) ![FastAPI](https://img.shields.io/badge/FastAPI-Python-green) ![Chroma](https://img.shields.io/badge/Chroma-Vector%20DB-purple)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Features
 
-## React Compiler
+### Frontend
+- Clean, ChatGPT-inspired chat interface
+- Full Markdown rendering with syntax-highlighted code blocks
+- LaTeX/Math formula support
+- Auto-scrolling chat history with timestamps
+- Loading indicators and error handling
+- Responsive design with dark mode support
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### Backend
+- FastAPI with automatic document indexing
+- RAG pipeline with Chroma vector database
+- LongCat LLM integration via OpenAI-compatible API
+- Comprehensive server logging
+- PDF and Markdown document support
 
-## Expanding the ESLint configuration
+## Quick Start
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### Prerequisites
+- Node.js 18+
+- Python 3.10+
+- API Keys:
+  - `LONGCAT_API_KEY` - For LLM responses
+  - `OPENAI_API_KEY` - For text embeddings
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### Frontend Setup
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+```bash
+# Install dependencies
+npm install
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+# Start development server
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+The frontend will be available at `http://localhost:5173`
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+### Backend Setup
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+# Navigate to backend
+cd backend
+
+# Create virtual environment
+python -m venv venv
+source venv/bin/activate  # Windows: venv\Scripts\activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Configure environment
+cp .env.example .env
+# Edit .env and add your API keys
+
+# Add documents to data/ folder
+
+# Start server
+python -m app.main
 ```
+
+The backend will be available at `http://localhost:8000`
+
+## Project Structure
+
+```
+├── src/                    # Frontend source
+│   ├── components/         # React components
+│   ├── services/          # API services
+│   └── types/             # TypeScript types
+├── backend/               # Backend source
+│   ├── app/               # FastAPI application
+│   │   ├── rag/          # RAG pipeline
+│   │   ├── llm/          # LLM client
+│   │   └── utils/        # Utilities
+│   ├── data/             # Document storage
+│   └── chroma_db/        # Vector database
+└── public/               # Static assets
+```
+
+## API Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/chat` | Send message and get AI response |
+| POST | `/reindex` | Manually re-index documents |
+| GET | `/health` | Health check |
+| GET | `/stats` | System statistics |
+
+## Configuration
+
+### Frontend
+Set `VITE_API_URL` environment variable to configure the backend URL (default: `http://localhost:8000`)
+
+### Backend
+See `backend/.env.example` for all configuration options.
+
+## Technologies
+
+### Frontend
+- React 19 with TypeScript
+- Vite build tool
+- react-markdown with remark-math
+- react-syntax-highlighter
+- KaTeX for LaTeX rendering
+
+### Backend
+- FastAPI
+- LangChain
+- Chroma vector database
+- OpenAI embeddings (text-embedding-3-small)
+- LongCat LLM (via OpenAI-compatible API)
+
+## License
+
+MIT License
