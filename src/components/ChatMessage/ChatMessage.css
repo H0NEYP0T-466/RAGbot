@@ -1,0 +1,245 @@
+.chat-message {
+  display: flex;
+  gap: 12px;
+  padding: 16px 24px;
+  transition: background-color 0.2s ease;
+}
+
+.chat-message:hover {
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+.chat-message.user {
+  flex-direction: row-reverse;
+}
+
+.chat-message.user .message-content {
+  align-items: flex-end;
+}
+
+.chat-message.user .message-text {
+  background-color: #10a37f;
+  color: white;
+  border-top-right-radius: 4px;
+  border-top-left-radius: 12px;
+}
+
+.chat-message.user .message-text a {
+  color: #fff;
+  text-decoration: underline;
+}
+
+.chat-message.assistant .message-text {
+  background-color: #f7f7f8;
+  color: #343541;
+  border-top-left-radius: 4px;
+  border-top-right-radius: 12px;
+}
+
+.message-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: white;
+}
+
+.chat-message.user .message-avatar {
+  background-color: #5436da;
+}
+
+.chat-message.assistant .message-avatar {
+  background-color: #10a37f;
+}
+
+.message-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-width: 80%;
+  min-width: 200px;
+}
+
+.message-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+}
+
+.message-role {
+  font-weight: 600;
+  color: #666;
+}
+
+.message-time {
+  color: #999;
+}
+
+.message-text {
+  padding: 12px 16px;
+  border-radius: 12px;
+  line-height: 1.6;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+.message-text p {
+  margin: 0 0 12px 0;
+}
+
+.message-text p:last-child {
+  margin-bottom: 0;
+}
+
+.message-text h1,
+.message-text h2,
+.message-text h3,
+.message-text h4,
+.message-text h5,
+.message-text h6 {
+  margin: 16px 0 8px 0;
+}
+
+.message-text h1:first-child,
+.message-text h2:first-child,
+.message-text h3:first-child {
+  margin-top: 0;
+}
+
+.message-text ul,
+.message-text ol {
+  margin: 8px 0;
+  padding-left: 24px;
+}
+
+.message-text li {
+  margin: 4px 0;
+}
+
+.message-text blockquote {
+  margin: 12px 0;
+  padding: 8px 16px;
+  border-left: 4px solid #10a37f;
+  background-color: rgba(16, 163, 127, 0.1);
+  border-radius: 0 8px 8px 0;
+}
+
+.message-text table {
+  border-collapse: collapse;
+  margin: 12px 0;
+  width: 100%;
+}
+
+.message-text th,
+.message-text td {
+  border: 1px solid #ddd;
+  padding: 8px 12px;
+  text-align: left;
+}
+
+.message-text th {
+  background-color: rgba(0, 0, 0, 0.05);
+  font-weight: 600;
+}
+
+.inline-code {
+  background-color: rgba(0, 0, 0, 0.1);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: 'SF Mono', 'Fira Code', 'Monaco', 'Menlo', monospace;
+  font-size: 0.9em;
+}
+
+.chat-message.user .inline-code {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.message-sources {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin-top: 8px;
+  padding: 8px 12px;
+  background-color: rgba(0, 0, 0, 0.03);
+  border-radius: 8px;
+  font-size: 12px;
+}
+
+.sources-label {
+  color: #666;
+  font-weight: 500;
+}
+
+.sources-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.source-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  background-color: #e8f5f1;
+  color: #10a37f;
+  border-radius: 4px;
+  font-size: 11px;
+}
+
+.source-score {
+  padding: 2px 4px;
+  background-color: #10a37f;
+  color: white;
+  border-radius: 3px;
+  font-weight: 500;
+}
+
+@media (prefers-color-scheme: dark) {
+  .chat-message:hover {
+    background-color: rgba(255, 255, 255, 0.02);
+  }
+
+  .chat-message.assistant .message-text {
+    background-color: #2d2d2d;
+    color: #ececf1;
+  }
+
+  .message-role {
+    color: #aaa;
+  }
+
+  .message-text blockquote {
+    background-color: rgba(16, 163, 127, 0.15);
+  }
+
+  .message-text th {
+    background-color: rgba(255, 255, 255, 0.05);
+  }
+
+  .message-text th,
+  .message-text td {
+    border-color: #444;
+  }
+
+  .inline-code {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+
+  .message-sources {
+    background-color: rgba(255, 255, 255, 0.05);
+  }
+
+  .sources-label {
+    color: #aaa;
+  }
+
+  .source-tag {
+    background-color: rgba(16, 163, 127, 0.2);
+  }
+}
