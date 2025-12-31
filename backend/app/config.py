@@ -41,10 +41,11 @@ class Settings(BaseSettings):
         "If the answer isn't in the context, say so clearly. Be concise and accurate."
     )
     
-    class Config:
-        env_file = ".env"
-        env_file_encoding = "utf-8"
-        extra = "ignore"
+    model_config = {
+        "env_file": ".env",
+        "env_file_encoding": "utf-8",
+        "extra": "ignore"
+    }
 
 
 @lru_cache()

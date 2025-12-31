@@ -20,7 +20,7 @@ class RichLogger:
         handler = logging.StreamHandler(sys.stdout)
         handler.setLevel(logging.INFO)
         
-        # Simple format - we'll add rich formatting manually
+        # Simple format - rich formatting is done through log methods
         formatter = logging.Formatter('%(message)s')
         handler.setFormatter(formatter)
         

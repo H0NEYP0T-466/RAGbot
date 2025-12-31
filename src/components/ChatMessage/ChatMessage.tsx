@@ -24,7 +24,8 @@ function ChatMessage({ message }: ChatMessageProps) {
     code(props) {
       const { children, className, ...rest } = props;
       const match = /language-(\w+)/.exec(className || '');
-      const isInline = !match && !className;
+      // Inline code has no language class or match
+      const isInline = !match && !className?.includes('language-');
       
       if (isInline) {
         return (

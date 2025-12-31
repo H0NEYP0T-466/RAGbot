@@ -30,7 +30,8 @@ class ApiService {
         if (i === attempts - 1) {
           throw error;
         }
-        await new Promise(resolve => setTimeout(resolve, this.retryDelay * (i + 1)));
+        // Exponential backoff: 1s, 2s, 4s
+        await new Promise(resolve => setTimeout(resolve, this.retryDelay * Math.pow(2, i)));
       }
     }
     throw new Error('Failed after all retry attempts');
