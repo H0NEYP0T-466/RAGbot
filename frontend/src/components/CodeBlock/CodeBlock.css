@@ -1,0 +1,60 @@
+.code-block {
+  margin: 12px 0;
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: #282c34;
+  border: 1px solid #3d4148;
+}
+
+.code-block-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background-color: #21252b;
+  border-bottom: 1px solid #3d4148;
+}
+
+.code-block-language {
+  font-size: 12px;
+  color: #abb2bf;
+  text-transform: lowercase;
+  font-family: 'SF Mono', Monaco, 'Courier New', monospace;
+}
+
+.code-block-copy-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  background-color: transparent;
+  border: 1px solid #4d5566;
+  border-radius: 4px;
+  color: #abb2bf;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.code-block-copy-btn:hover {
+  background-color: #3d4148;
+  border-color: #61afef;
+  color: #61afef;
+}
+
+.copy-icon {
+  width: 14px;
+  height: 14px;
+}
+
+/* Override syntax highlighter styles */
+.code-block pre {
+  margin: 0 !important;
+  padding: 16px !important;
+}
+
+.code-block code {
+  font-family: 'SF Mono', Monaco, 'Courier New', monospace !important;
+  font-size: 14px !important;
+  line-height: 1.6 !important;
+}
