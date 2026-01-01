@@ -25,7 +25,7 @@ class Settings(BaseSettings):
     # LLM Configuration
     llm_model: str = "LongCat-Flash-Chat"
     llm_temperature: float = 0.7
-    llm_max_tokens: int = 2000
+    llm_max_tokens: int = 8192
     
     # Server Configuration
     backend_host: str = "0.0.0.0"

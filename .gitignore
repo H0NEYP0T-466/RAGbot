@@ -28,6 +28,7 @@ backend/.env
 backend/chroma_db/*
 backend/faiss_index/*
 backend/data/history.txt
+backend/data/
 !backend/chroma_db/.gitignore
 !backend/faiss_index/.gitignore
 __pycache__
