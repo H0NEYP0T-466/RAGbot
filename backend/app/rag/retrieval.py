@@ -44,8 +44,8 @@ class RAGRetrieval:
         for doc, score in results:
             # FAISS returns L2 distance - lower is better
             # Convert to a similarity score (inverse of distance, normalized)
-            # For L2 distance, we'll use 1/(1+distance) as similarity
-            similarity = 1 / (1 + score)
+            # For L2 distance, we use 1/(1+distance+epsilon) for numerical stability
+            similarity = 1 / (1 + score + 1e-8)
             
             chunk_info = {
                 "content": doc.page_content,

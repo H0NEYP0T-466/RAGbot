@@ -102,8 +102,11 @@ class VectorStoreManager:
             if vectorstore is None:
                 count = 0
             else:
-                # Use FAISS index to get document count
-                count = vectorstore.index.ntotal if hasattr(vectorstore, 'index') else 0
+                # Use FAISS index to get document count with proper error handling
+                try:
+                    count = vectorstore.index.ntotal if hasattr(vectorstore, 'index') and vectorstore.index is not None else 0
+                except (AttributeError, Exception):
+                    count = 0
             
             return {
                 "total_chunks": count,
