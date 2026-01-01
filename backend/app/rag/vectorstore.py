@@ -1,7 +1,7 @@
 """FAISS vector store initialization and management."""
 
 import os
-import pickle
+import shutil
 from typing import Optional
 
 from langchain_community.vectorstores import FAISS
@@ -40,8 +40,13 @@ class VectorStoreManager:
             )
         return self._embeddings
     
-    def get_vectorstore(self) -> FAISS:
-        """Get or create the FAISS vector store."""
+    def get_vectorstore(self) -> Optional[FAISS]:
+        """
+        Get or create the FAISS vector store.
+        
+        Returns:
+            FAISS vectorstore if it exists, None if no index has been created yet.
+        """
         if self._vectorstore is None:
             embeddings = self._get_embeddings()
             index_path = self.settings.faiss_index_path
@@ -59,8 +64,8 @@ class VectorStoreManager:
                     logger.warning(f"Failed to load existing index: {e}. Creating new index.")
                     self._vectorstore = None
             
-            # If no existing index or loading failed, create empty vectorstore
-            # We'll populate it during indexing
+            # If no existing index or loading failed, vectorstore remains None
+            # It will be created during document indexing
         
         return self._vectorstore
     
@@ -73,7 +78,6 @@ class VectorStoreManager:
             # Remove existing index files if they exist
             index_path = self.settings.faiss_index_path
             if os.path.exists(index_path):
-                import shutil
                 shutil.rmtree(index_path)
             
             logger.info(f"Vector store index has been reset")

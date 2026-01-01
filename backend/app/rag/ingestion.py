@@ -140,7 +140,6 @@ class DocumentIngestion:
         vectorstore = FAISS.from_documents(chunks, embeddings)
         
         # Save the index to disk
-        import os
         os.makedirs(self.settings.faiss_index_path, exist_ok=True)
         vectorstore.save_local(self.settings.faiss_index_path)
         
