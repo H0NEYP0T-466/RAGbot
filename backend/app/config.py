@@ -11,12 +11,8 @@ class Settings(BaseSettings):
     # LongCat API Configuration
     longcat_api_key: str = ""
     
-    # OpenAI API Configuration (for embeddings)
-    openai_api_key: str = ""
-    
-    # Vector Database Configuration
-    vector_db_path: str = "./chroma_db"
-    collection_name: str = "rag_documents"
+    # Vector Database Configuration (FAISS)
+    faiss_index_path: str = "./faiss_index"
     
     # Data Configuration
     data_folder: str = "./data"

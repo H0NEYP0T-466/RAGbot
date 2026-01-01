@@ -30,7 +30,7 @@ async def lifespan(app: FastAPI):
     
     settings = get_settings()
     logger.info(f"Data folder: {settings.data_folder}")
-    logger.info(f"Vector DB path: {settings.vector_db_path}")
+    logger.info(f"FAISS Index path: {settings.faiss_index_path}")
     logger.info(f"LLM Model: {settings.llm_model}")
     
     # Auto-index documents on startup

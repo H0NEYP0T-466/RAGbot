@@ -7,6 +7,7 @@ from typing import Optional
 
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.document_loaders import PyPDFLoader, TextLoader
+from langchain_community.vectorstores import FAISS
 
 from app.config import get_settings
 from app.rag.vectorstore import get_vectorstore_manager
@@ -131,12 +132,20 @@ class DocumentIngestion:
         
         logger.info(f"Split {len(all_documents)} documents into {len(chunks)} chunks")
         
-        # Reset the vector store and add new chunks
+        # Reset the vector store and create new FAISS index
         self.vectorstore_manager.reset_vectorstore()
-        vectorstore = self.vectorstore_manager.get_vectorstore()
         
-        # Add documents to vector store
-        vectorstore.add_documents(chunks)
+        # Create FAISS vectorstore from documents
+        embeddings = self.vectorstore_manager._get_embeddings()
+        vectorstore = FAISS.from_documents(chunks, embeddings)
+        
+        # Save the index to disk
+        import os
+        os.makedirs(self.settings.faiss_index_path, exist_ok=True)
+        vectorstore.save_local(self.settings.faiss_index_path)
+        
+        # Update the cached vectorstore
+        self.vectorstore_manager._vectorstore = vectorstore
         
         # Update tracking
         self._documents_count = len(files)
@@ -151,10 +160,10 @@ class DocumentIngestion:
         collection_stats = self.vectorstore_manager.get_collection_stats()
         
         # Calculate approximate DB size
-        db_path = Path(self.settings.vector_db_path)
+        index_path = Path(self.settings.faiss_index_path)
         total_size = 0
-        if db_path.exists():
-            for file in db_path.rglob("*"):
+        if index_path.exists():
+            for file in index_path.rglob("*"):
                 if file.is_file():
                     total_size += file.stat().st_size
         

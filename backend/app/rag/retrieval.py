@@ -33,16 +33,25 @@ class RAGRetrieval:
         
         vectorstore = self.vectorstore_manager.get_vectorstore()
         
+        if vectorstore is None:
+            logger.warning("Vector store is not initialized. No documents indexed.")
+            return []
+        
         # Perform similarity search with scores
         results = vectorstore.similarity_search_with_score(query, k=k)
         
         chunks = []
         for doc, score in results:
+            # FAISS returns L2 distance - lower is better
+            # Convert to a similarity score (inverse of distance, normalized)
+            # For L2 distance, we'll use 1/(1+distance) as similarity
+            similarity = 1 / (1 + score)
+            
             chunk_info = {
                 "content": doc.page_content,
                 "source": doc.metadata.get("source", "unknown"),
                 "page": doc.metadata.get("page", None),
-                "score": 1 - score  # Convert distance to similarity (Chroma uses L2 distance)
+                "score": similarity
             }
             chunks.append(chunk_info)
         
