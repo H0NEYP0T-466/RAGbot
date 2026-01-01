@@ -40,6 +40,10 @@ class VectorStoreManager:
             )
         return self._embeddings
     
+    def get_embeddings(self) -> HuggingFaceEmbeddings:
+        """Get the embeddings function for public access."""
+        return self._get_embeddings()
+    
     def get_vectorstore(self) -> Optional[FAISS]:
         """
         Get or create the FAISS vector store.
@@ -94,8 +98,8 @@ class VectorStoreManager:
             if vectorstore is None:
                 count = 0
             else:
-                # FAISS stores documents in index.docstore._dict
-                count = len(vectorstore.docstore._dict) if hasattr(vectorstore, 'docstore') else 0
+                # Use FAISS index to get document count
+                count = vectorstore.index.ntotal if hasattr(vectorstore, 'index') else 0
             
             return {
                 "total_chunks": count,

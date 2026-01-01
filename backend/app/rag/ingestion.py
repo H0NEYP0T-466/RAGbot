@@ -136,7 +136,7 @@ class DocumentIngestion:
         self.vectorstore_manager.reset_vectorstore()
         
         # Create FAISS vectorstore from documents
-        embeddings = self.vectorstore_manager._get_embeddings()
+        embeddings = self.vectorstore_manager.get_embeddings()
         vectorstore = FAISS.from_documents(chunks, embeddings)
         
         # Save the index to disk
