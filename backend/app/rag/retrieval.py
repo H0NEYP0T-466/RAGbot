@@ -133,6 +133,11 @@ class RAGRetrieval:
         conversation_history.append_conversation(user_input, llm_response["content"])
         
         # Step 6: Re-index documents to include updated history
+        # NOTE: Re-indexing after each conversation ensures immediate availability of history
+        # in RAG retrieval but adds latency (~1-3s). For production use, consider:
+        # - Async/background re-indexing
+        # - Periodic batch re-indexing
+        # - Incremental index updates
         try:
             ingestion = get_document_ingestion()
             ingestion.index_documents()
