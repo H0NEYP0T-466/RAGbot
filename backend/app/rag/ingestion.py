@@ -89,6 +89,12 @@ class DocumentIngestion:
                         "name": file_path.name,
                         "type": "markdown"
                     })
+                elif suffix == ".txt":
+                    found_files.append({
+                        "path": str(file_path),
+                        "name": file_path.name,
+                        "type": "text"
+                    })
         
         return found_files
     
@@ -118,6 +124,8 @@ class DocumentIngestion:
                 docs = self._load_pdf(file_info["path"])
             elif file_info["type"] == "markdown":
                 docs = self._load_markdown(file_info["path"])
+            elif file_info["type"] == "text":
+                docs = self._load_markdown(file_info["path"])  # Text files use same loader as markdown
             else:
                 continue
             
