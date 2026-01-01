@@ -144,7 +144,7 @@ class DocumentIngestion:
         vectorstore.save_local(self.settings.faiss_index_path)
         
         # Update the cached vectorstore
-        self.vectorstore_manager._vectorstore = vectorstore
+        self.vectorstore_manager.set_vectorstore(vectorstore)
         
         # Update tracking
         self._documents_count = len(files)

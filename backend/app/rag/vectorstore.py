@@ -44,6 +44,10 @@ class VectorStoreManager:
         """Get the embeddings function for public access."""
         return self._get_embeddings()
     
+    def set_vectorstore(self, vectorstore: FAISS) -> None:
+        """Set the cached vectorstore instance."""
+        self._vectorstore = vectorstore
+    
     def get_vectorstore(self) -> Optional[FAISS]:
         """
         Get or create the FAISS vector store.
