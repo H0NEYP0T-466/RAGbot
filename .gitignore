@@ -38,7 +38,7 @@ venv
 env
 *.egg-info
 .eggs
-
+.env
 # Test coverage
 coverage
 .coverage
