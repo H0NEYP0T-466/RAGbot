@@ -1,7 +1,7 @@
 """RAG query logic and document retrieval."""
 
-import asyncio
 import time
+import threading
 from typing import Optional
 
 from app.config import get_settings
@@ -21,27 +21,9 @@ class RAGRetrieval:
         self.vectorstore_manager = get_vectorstore_manager()
         self.llm_client = get_longcat_client()
     
-    async def _reindex_history_async(self, history_file_path: str):
+    def _reindex_history_background(self, history_file_path: str):
         """
-        Background task to re-index the history file incrementally.
-        
-        Args:
-            history_file_path: Path to the history.txt file
-        """
-        try:
-            # Run the blocking indexing operation in a thread pool
-            loop = asyncio.get_event_loop()
-            await loop.run_in_executor(
-                None,
-                self._reindex_history_sync,
-                history_file_path
-            )
-        except Exception as e:
-            logger.warning(f"Background re-indexing failed: {str(e)}")
-    
-    def _reindex_history_sync(self, history_file_path: str):
-        """
-        Synchronous re-indexing of history file (runs in thread pool).
+        Background thread function to re-index the history file incrementally.
         
         Args:
             history_file_path: Path to the history.txt file
@@ -193,8 +175,13 @@ class RAGRetrieval:
         # incrementally for better performance.
         try:
             history_file_path = conversation_history.history_file
-            # Create background task for re-indexing
-            asyncio.create_task(self._reindex_history_async(str(history_file_path)))
+            # Start background thread for re-indexing
+            thread = threading.Thread(
+                target=self._reindex_history_background,
+                args=(str(history_file_path),),
+                daemon=True
+            )
+            thread.start()
         except Exception as e:
             logger.warning(f"Failed to schedule background re-indexing: {str(e)}")
         
