@@ -1,6 +1,7 @@
 """RAG query logic and document retrieval."""
 
 import time
+import threading
 from typing import Optional
 
 from app.config import get_settings
@@ -19,6 +20,20 @@ class RAGRetrieval:
         self.settings = get_settings()
         self.vectorstore_manager = get_vectorstore_manager()
         self.llm_client = get_longcat_client()
+    
+    def _reindex_history_background(self, history_file_path: str):
+        """
+        Background thread function to re-index the history file incrementally.
+        
+        Args:
+            history_file_path: Path to the history.txt file
+        """
+        try:
+            ingestion = get_document_ingestion()
+            ingestion.index_single_file(history_file_path)
+            logger.info("Re-indexed conversation history incrementally")
+        except Exception as e:
+            logger.warning(f"Failed to re-index history file: {str(e)}")
     
     def retrieve_relevant_chunks(self, query: str, k: Optional[int] = None) -> list[dict]:
         """
@@ -132,19 +147,6 @@ class RAGRetrieval:
         conversation_history = get_conversation_history()
         conversation_history.append_conversation(user_input, llm_response["content"])
         
-        # Step 6: Re-index documents to include updated history
-        # NOTE: Re-indexing after each conversation ensures immediate availability of history
-        # in RAG retrieval but adds latency (~1-3s). For production use, consider:
-        # - Async/background re-indexing
-        # - Periodic batch re-indexing
-        # - Incremental index updates
-        try:
-            ingestion = get_document_ingestion()
-            ingestion.index_documents()
-            logger.info("Re-indexed documents including conversation history")
-        except Exception as e:
-            logger.warning(f"Failed to re-index after conversation: {str(e)}")
-        
         # Build response
         sources = [
             Source(
@@ -161,11 +163,36 @@ class RAGRetrieval:
             total=llm_response["usage"]["total_tokens"]
         )
         
-        return ChatResponse(
+        response_obj = ChatResponse(
             response=llm_response["content"],
             sources=sources,
             tokens=tokens
         )
+        
+        # Step 6: Trigger background re-indexing of history file only
+        # NOTE: Re-indexing is now done asynchronously after returning the response
+        # to avoid blocking the API response. Only the history.txt file is re-indexed
+        # incrementally for better performance.
+        #
+        # Using daemon thread: The thread will terminate when the main program exits.
+        # This is acceptable because:
+        # - History updates are not critical (next conversation will re-index)
+        # - Non-daemon threads would delay application shutdown
+        # - User experience (immediate response) is prioritized over ensuring
+        #   every history update completes before shutdown
+        try:
+            history_file_path = conversation_history.history_file
+            # Start background thread for re-indexing
+            thread = threading.Thread(
+                target=self._reindex_history_background,
+                args=(str(history_file_path),),
+                daemon=True
+            )
+            thread.start()
+        except Exception as e:
+            logger.warning(f"Failed to schedule background re-indexing: {str(e)}")
+        
+        return response_obj
 
 
 # Singleton instance
