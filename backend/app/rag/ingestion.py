@@ -112,19 +112,24 @@ class DocumentIngestion:
         if index_file.exists():
             # Try to load existing index
             logger.info(f"Found existing FAISS index at {self.settings.faiss_index_path}")
-            vectorstore = self.vectorstore_manager.get_vectorstore()
-            
-            if vectorstore is not None:
-                # Get stats from the loaded index
-                stats = self.vectorstore_manager.get_collection_stats()
-                chunks_count = stats.get("total_chunks", 0)
+            try:
+                vectorstore = self.vectorstore_manager.get_vectorstore()
                 
-                # Count documents in data folder
-                files = self.scan_data_folder()
-                self._documents_count = len(files)
-                
-                logger.info(f"Loaded existing index: {self._documents_count} documents, {chunks_count} chunks")
-                return self._documents_count, chunks_count
+                if vectorstore is not None:
+                    # Get stats from the loaded index
+                    stats = self.vectorstore_manager.get_collection_stats()
+                    chunks_count = stats.get("total_chunks", 0)
+                    
+                    # Count documents in data folder
+                    files = self.scan_data_folder()
+                    self._documents_count = len(files)
+                    
+                    logger.info(f"Loaded existing index: {self._documents_count} documents, {chunks_count} chunks")
+                    return self._documents_count, chunks_count
+                else:
+                    logger.warning("Index file exists but failed to load. Will create new index.")
+            except Exception as e:
+                logger.warning(f"Failed to load existing index: {str(e)}. Will create new index.")
         
         # No existing index or loading failed, create new index
         logger.info("No existing index found, creating new index from documents...")
