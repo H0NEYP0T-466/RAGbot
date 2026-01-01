@@ -33,13 +33,13 @@ async def lifespan(app: FastAPI):
     logger.info(f"FAISS Index path: {settings.faiss_index_path}")
     logger.info(f"LLM Model: {settings.llm_model}")
     
-    # Auto-index documents on startup
+    # Load existing index or create new one on startup
     try:
         ingestion = get_document_ingestion()
-        docs, chunks = ingestion.index_documents()
-        logger.info(f"Startup indexing complete: {docs} documents, {chunks} chunks")
+        docs, chunks = ingestion.load_or_create_index()
+        logger.info(f"Startup complete: {docs} documents, {chunks} chunks")
     except Exception as e:
-        logger.error(f"Startup indexing failed: {str(e)}")
+        logger.error(f"Startup failed: {str(e)}")
         logger.warning("Server starting without indexed documents. Call /reindex to index manually.")
     
     logger.info("RAG Chatbot Backend started successfully!")
