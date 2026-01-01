@@ -1,5 +1,6 @@
 import ReactMarkdown from 'react-markdown';
 import remarkMath from 'remark-math';
+import remarkGfm from 'remark-gfm';
 import rehypeKatex from 'rehype-katex';
 import type { Components } from 'react-markdown';
 import type { Message } from '../../types';
@@ -69,7 +70,7 @@ function ChatMessage({ message }: ChatMessageProps) {
         </div>
         <div className="message-text">
           <ReactMarkdown
-            remarkPlugins={[remarkMath]}
+            remarkPlugins={[remarkMath, remarkGfm]}
             rehypePlugins={[rehypeKatex]}
             components={components}
           >
