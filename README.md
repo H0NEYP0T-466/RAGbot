@@ -2,7 +2,7 @@
 
 A production-ready **RAG (Retrieval-Augmented Generation) chatbot** with a ChatGPT-like frontend and Python FastAPI backend.
 
-![RAG Chatbot](https://img.shields.io/badge/React-TypeScript-blue) ![FastAPI](https://img.shields.io/badge/FastAPI-Python-green) ![Chroma](https://img.shields.io/badge/Chroma-Vector%20DB-purple)
+![RAG Chatbot](https://img.shields.io/badge/React-TypeScript-blue) ![FastAPI](https://img.shields.io/badge/FastAPI-Python-green) ![FAISS](https://img.shields.io/badge/FAISS-Vector%20DB-purple)
 
 ## Features
 
@@ -16,7 +16,8 @@ A production-ready **RAG (Retrieval-Augmented Generation) chatbot** with a ChatG
 
 ### Backend
 - FastAPI with automatic document indexing
-- RAG pipeline with Chroma vector database
+- RAG pipeline with FAISS vector database
+- Free Sentence Transformers embeddings (all-MiniLM-L6-v2)
 - LongCat LLM integration via OpenAI-compatible API
 - Comprehensive server logging
 - PDF and Markdown document support
@@ -26,9 +27,8 @@ A production-ready **RAG (Retrieval-Augmented Generation) chatbot** with a ChatG
 ### Prerequisites
 - Node.js 18+
 - Python 3.10+
-- API Keys:
-  - `LONGCAT_API_KEY` - For LLM responses
-  - `OPENAI_API_KEY` - For text embeddings
+- API Key:
+  - `LONGCAT_API_KEY` - For LLM responses (free tier available)
 
 ### Frontend Setup
 
@@ -80,7 +80,7 @@ The backend will be available at `http://localhost:8000`
 │   │   ├── llm/          # LLM client
 │   │   └── utils/        # Utilities
 │   ├── data/             # Document storage
-│   └── chroma_db/        # Vector database
+│   └── faiss_index/      # FAISS vector index
 └── public/               # Static assets
 ```
 
@@ -113,8 +113,8 @@ See `backend/.env.example` for all configuration options.
 ### Backend
 - FastAPI
 - LangChain
-- Chroma vector database
-- OpenAI embeddings (text-embedding-3-small)
+- FAISS vector database (CPU version)
+- HuggingFace Sentence Transformers (all-MiniLM-L6-v2)
 - LongCat LLM (via OpenAI-compatible API)
 
 ## License

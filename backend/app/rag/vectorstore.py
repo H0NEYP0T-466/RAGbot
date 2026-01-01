@@ -1,27 +1,25 @@
-"""Chroma vector store initialization and management."""
+"""FAISS vector store initialization and management."""
 
 import os
+import shutil
 from typing import Optional
 
-import chromadb
-from chromadb.config import Settings as ChromaSettings
-from langchain_community.vectorstores import Chroma
-from langchain_openai import OpenAIEmbeddings
+from langchain_community.vectorstores import FAISS
+from langchain_community.embeddings import HuggingFaceEmbeddings
 
 from app.config import get_settings
 from app.utils.logger import logger
 
 
 class VectorStoreManager:
-    """Manages the Chroma vector store for document embeddings."""
+    """Manages the FAISS vector store for document embeddings."""
     
     _instance: Optional["VectorStoreManager"] = None
     
     def __init__(self):
         self.settings = get_settings()
-        self._embeddings: Optional[OpenAIEmbeddings] = None
-        self._vectorstore: Optional[Chroma] = None
-        self._client: Optional[chromadb.Client] = None
+        self._embeddings: Optional[HuggingFaceEmbeddings] = None
+        self._vectorstore: Optional[FAISS] = None
     
     @classmethod
     def get_instance(cls) -> "VectorStoreManager":
@@ -30,89 +28,103 @@ class VectorStoreManager:
             cls._instance = cls()
         return cls._instance
     
-    def _get_embeddings(self) -> OpenAIEmbeddings:
-        """Get or create OpenAI embeddings instance."""
+    def _get_embeddings(self) -> HuggingFaceEmbeddings:
+        """Get or create HuggingFace embeddings instance."""
         if self._embeddings is None:
-            self._embeddings = OpenAIEmbeddings(
-                model="text-embedding-3-small",
-                openai_api_key=self.settings.openai_api_key
+            # Using all-MiniLM-L6-v2 - a lightweight, fast, and free model
+            # 384 dimensions, good quality for semantic search
+            self._embeddings = HuggingFaceEmbeddings(
+                model_name="sentence-transformers/all-MiniLM-L6-v2",
+                model_kwargs={'device': 'cpu'},
+                encode_kwargs={'normalize_embeddings': True}
             )
         return self._embeddings
     
-    def _get_chroma_client(self) -> chromadb.PersistentClient:
-        """Get or create Chroma client."""
-        if self._client is None:
-            # Ensure the directory exists
-            os.makedirs(self.settings.vector_db_path, exist_ok=True)
-            
-            self._client = chromadb.PersistentClient(
-                path=self.settings.vector_db_path,
-                settings=ChromaSettings(
-                    anonymized_telemetry=False,
-                    allow_reset=True
-                )
-            )
-        return self._client
+    def get_embeddings(self) -> HuggingFaceEmbeddings:
+        """Get the embeddings function for public access."""
+        return self._get_embeddings()
     
-    def get_vectorstore(self) -> Chroma:
-        """Get or create the Chroma vector store."""
+    def set_vectorstore(self, vectorstore: FAISS) -> None:
+        """Set the cached vectorstore instance."""
+        self._vectorstore = vectorstore
+    
+    def get_vectorstore(self) -> Optional[FAISS]:
+        """
+        Get or create the FAISS vector store.
+        
+        Returns:
+            FAISS vectorstore if it exists, None if no index has been created yet.
+        """
         if self._vectorstore is None:
             embeddings = self._get_embeddings()
-            client = self._get_chroma_client()
+            index_path = self.settings.faiss_index_path
             
-            self._vectorstore = Chroma(
-                client=client,
-                collection_name=self.settings.collection_name,
-                embedding_function=embeddings
-            )
+            # Try to load existing index
+            if os.path.exists(index_path) and os.path.exists(os.path.join(index_path, "index.faiss")):
+                try:
+                    self._vectorstore = FAISS.load_local(
+                        index_path,
+                        embeddings,
+                        allow_dangerous_deserialization=True
+                    )
+                    logger.info(f"Loaded existing FAISS index from {index_path}")
+                except Exception as e:
+                    logger.warning(f"Failed to load existing index: {e}. Creating new index.")
+                    self._vectorstore = None
+            
+            # If no existing index or loading failed, vectorstore remains None
+            # It will be created during document indexing
+        
         return self._vectorstore
     
     def reset_vectorstore(self) -> None:
-        """Reset the vector store by clearing the collection."""
+        """Reset the vector store by clearing the index."""
         try:
-            client = self._get_chroma_client()
-            
-            # Delete the collection if it exists
-            try:
-                client.delete_collection(self.settings.collection_name)
-            except Exception:
-                pass  # Collection might not exist
-            
             # Reset the cached vectorstore
             self._vectorstore = None
             
-            logger.info(f"Vector store collection '{self.settings.collection_name}' has been reset")
+            # Remove existing index files if they exist
+            index_path = self.settings.faiss_index_path
+            if os.path.exists(index_path):
+                shutil.rmtree(index_path)
+            
+            logger.info(f"Vector store index has been reset")
             
         except Exception as e:
             logger.error(f"Failed to reset vector store: {str(e)}")
             raise
     
     def get_collection_stats(self) -> dict:
-        """Get statistics about the current collection."""
+        """Get statistics about the current index."""
         try:
             vectorstore = self.get_vectorstore()
-            collection = vectorstore._collection
             
-            count = collection.count()
+            if vectorstore is None:
+                count = 0
+            else:
+                # Use FAISS index to get document count with proper error handling
+                try:
+                    count = vectorstore.index.ntotal if hasattr(vectorstore, 'index') and vectorstore.index is not None else 0
+                except (AttributeError, Exception):
+                    count = 0
             
             return {
-                "collection_name": self.settings.collection_name,
                 "total_chunks": count,
-                "vector_db_path": self.settings.vector_db_path
+                "faiss_index_path": self.settings.faiss_index_path
             }
         except Exception as e:
             logger.error(f"Failed to get collection stats: {str(e)}")
             return {
-                "collection_name": self.settings.collection_name,
                 "total_chunks": 0,
-                "vector_db_path": self.settings.vector_db_path,
+                "faiss_index_path": self.settings.faiss_index_path,
                 "error": str(e)
             }
     
     def is_connected(self) -> bool:
-        """Check if the vector store is connected and operational."""
+        """Check if the vector store is operational."""
         try:
-            self.get_vectorstore()
+            # For FAISS, we just check if embeddings can be created
+            self._get_embeddings()
             return True
         except Exception:
             return False
