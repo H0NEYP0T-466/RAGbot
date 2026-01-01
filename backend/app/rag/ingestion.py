@@ -216,6 +216,9 @@ class DocumentIngestion:
         
         if vectorstore is None:
             # No existing index, do a full index instead
+            # NOTE: This fallback ensures the system recovers gracefully if the
+            # index doesn't exist. It only happens on first run or after index deletion.
+            # For normal operation with an existing index, incremental updates are used.
             logger.warning("No existing index found, performing full index")
             return self.index_documents()
         

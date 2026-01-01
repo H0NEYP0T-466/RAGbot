@@ -173,6 +173,13 @@ class RAGRetrieval:
         # NOTE: Re-indexing is now done asynchronously after returning the response
         # to avoid blocking the API response. Only the history.txt file is re-indexed
         # incrementally for better performance.
+        #
+        # Using daemon thread: The thread will terminate when the main program exits.
+        # This is acceptable because:
+        # - History updates are not critical (next conversation will re-index)
+        # - Non-daemon threads would delay application shutdown
+        # - User experience (immediate response) is prioritized over ensuring
+        #   every history update completes before shutdown
         try:
             history_file_path = conversation_history.history_file
             # Start background thread for re-indexing
