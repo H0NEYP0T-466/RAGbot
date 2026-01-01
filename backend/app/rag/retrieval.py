@@ -1,5 +1,6 @@
 """RAG query logic and document retrieval."""
 
+import asyncio
 import time
 from typing import Optional
 
@@ -19,6 +20,38 @@ class RAGRetrieval:
         self.settings = get_settings()
         self.vectorstore_manager = get_vectorstore_manager()
         self.llm_client = get_longcat_client()
+    
+    async def _reindex_history_async(self, history_file_path: str):
+        """
+        Background task to re-index the history file incrementally.
+        
+        Args:
+            history_file_path: Path to the history.txt file
+        """
+        try:
+            # Run the blocking indexing operation in a thread pool
+            loop = asyncio.get_event_loop()
+            await loop.run_in_executor(
+                None,
+                self._reindex_history_sync,
+                history_file_path
+            )
+        except Exception as e:
+            logger.warning(f"Background re-indexing failed: {str(e)}")
+    
+    def _reindex_history_sync(self, history_file_path: str):
+        """
+        Synchronous re-indexing of history file (runs in thread pool).
+        
+        Args:
+            history_file_path: Path to the history.txt file
+        """
+        try:
+            ingestion = get_document_ingestion()
+            ingestion.index_single_file(history_file_path)
+            logger.info("Re-indexed conversation history incrementally")
+        except Exception as e:
+            logger.warning(f"Failed to re-index history file: {str(e)}")
     
     def retrieve_relevant_chunks(self, query: str, k: Optional[int] = None) -> list[dict]:
         """
@@ -132,19 +165,6 @@ class RAGRetrieval:
         conversation_history = get_conversation_history()
         conversation_history.append_conversation(user_input, llm_response["content"])
         
-        # Step 6: Re-index documents to include updated history
-        # NOTE: Re-indexing after each conversation ensures immediate availability of history
-        # in RAG retrieval but adds latency (~1-3s). For production use, consider:
-        # - Async/background re-indexing
-        # - Periodic batch re-indexing
-        # - Incremental index updates
-        try:
-            ingestion = get_document_ingestion()
-            ingestion.index_documents()
-            logger.info("Re-indexed documents including conversation history")
-        except Exception as e:
-            logger.warning(f"Failed to re-index after conversation: {str(e)}")
-        
         # Build response
         sources = [
             Source(
@@ -161,11 +181,24 @@ class RAGRetrieval:
             total=llm_response["usage"]["total_tokens"]
         )
         
-        return ChatResponse(
+        response_obj = ChatResponse(
             response=llm_response["content"],
             sources=sources,
             tokens=tokens
         )
+        
+        # Step 6: Trigger background re-indexing of history file only
+        # NOTE: Re-indexing is now done asynchronously after returning the response
+        # to avoid blocking the API response. Only the history.txt file is re-indexed
+        # incrementally for better performance.
+        try:
+            history_file_path = conversation_history.history_file
+            # Create background task for re-indexing
+            asyncio.create_task(self._reindex_history_async(str(history_file_path)))
+        except Exception as e:
+            logger.warning(f"Failed to schedule background re-indexing: {str(e)}")
+        
+        return response_obj
 
 
 # Singleton instance

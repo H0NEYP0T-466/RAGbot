@@ -199,6 +199,68 @@ class DocumentIngestion:
         
         return len(files), len(chunks)
     
+    def index_single_file(self, file_path: str) -> tuple[int, int]:
+        """
+        Incrementally index a single file by adding it to existing index.
+        
+        Args:
+            file_path: Path to the file to index
+        
+        Returns:
+            Tuple of (documents_count, chunks_count)
+        """
+        logger.info(f"Incrementally indexing file: {file_path}")
+        
+        # Get existing vectorstore
+        vectorstore = self.vectorstore_manager.get_vectorstore()
+        
+        if vectorstore is None:
+            # No existing index, do a full index instead
+            logger.warning("No existing index found, performing full index")
+            return self.index_documents()
+        
+        # Load the single file
+        file_name = os.path.basename(file_path)
+        suffix = Path(file_path).suffix.lower()
+        
+        docs = []
+        if suffix == ".pdf":
+            docs = self._load_pdf(file_path)
+        elif suffix == ".md":
+            docs = self._load_markdown(file_path)
+        elif suffix == ".txt":
+            docs = self._load_markdown(file_path)
+        
+        if not docs:
+            logger.warning(f"No content loaded from {file_path}")
+            return self._documents_count, self.vectorstore_manager.get_collection_stats().get("total_chunks", 0)
+        
+        # Split into chunks
+        chunks = self.text_splitter.split_documents(docs)
+        
+        if not chunks:
+            logger.warning(f"No chunks created from {file_path}")
+            return self._documents_count, self.vectorstore_manager.get_collection_stats().get("total_chunks", 0)
+        
+        logger.info(f"Adding {len(chunks)} chunks from {file_name} to existing index")
+        
+        # Add new chunks to existing vectorstore
+        vectorstore.add_documents(chunks)
+        
+        # Save the updated index
+        vectorstore.save_local(self.settings.faiss_index_path)
+        
+        # Update the cached vectorstore
+        self.vectorstore_manager.set_vectorstore(vectorstore)
+        
+        # Get updated stats
+        stats = self.vectorstore_manager.get_collection_stats()
+        total_chunks = stats.get("total_chunks", 0)
+        
+        logger.info(f"Incremental indexing complete: added {len(chunks)} chunks, total now {total_chunks}")
+        
+        return self._documents_count, total_chunks
+    
     def get_stats(self) -> dict:
         """Get indexing statistics."""
         collection_stats = self.vectorstore_manager.get_collection_stats()
