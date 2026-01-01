@@ -6,6 +6,8 @@ from typing import Optional
 from app.config import get_settings
 from app.llm.longcat_client import get_longcat_client
 from app.models import ChatResponse, Source, TokenUsage
+from app.rag.history import get_conversation_history
+from app.rag.ingestion import get_document_ingestion
 from app.rag.vectorstore import get_vectorstore_manager
 from app.utils.logger import logger
 
@@ -125,6 +127,23 @@ class RAGRetrieval:
             max_tokens=self.settings.llm_max_tokens,
             response_time=response_time
         )
+        
+        # Step 5: Append conversation to history file
+        conversation_history = get_conversation_history()
+        conversation_history.append_conversation(user_input, llm_response["content"])
+        
+        # Step 6: Re-index documents to include updated history
+        # NOTE: Re-indexing after each conversation ensures immediate availability of history
+        # in RAG retrieval but adds latency (~1-3s). For production use, consider:
+        # - Async/background re-indexing
+        # - Periodic batch re-indexing
+        # - Incremental index updates
+        try:
+            ingestion = get_document_ingestion()
+            ingestion.index_documents()
+            logger.info("Re-indexed documents including conversation history")
+        except Exception as e:
+            logger.warning(f"Failed to re-index after conversation: {str(e)}")
         
         # Build response
         sources = [
