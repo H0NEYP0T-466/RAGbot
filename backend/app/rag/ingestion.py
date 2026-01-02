@@ -132,6 +132,7 @@ class DocumentIngestion:
                         "type": "text"
                     })
                 elif suffix in [".docx", ".doc"]:
+                    # UnstructuredWordDocumentLoader handles both .docx and .doc formats
                     found_files.append({
                         "path": str(file_path),
                         "name": file_path.name,
