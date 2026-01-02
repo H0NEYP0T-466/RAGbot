@@ -1,0 +1,128 @@
+name: Feature Request
+description: Propose an enhancement or new feature
+labels: ["enhancement"]
+title: "[Feature]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for suggesting a new feature! Please provide as much detail as possible to help us understand your proposal.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem Statement
+      description: What problem does this feature solve? What is the motivation?
+      placeholder: Is your feature request related to a problem? Please describe.
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed Solution
+      description: Describe the solution you'd like to see implemented
+      placeholder: A clear and concise description of what you want to happen
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: Have you considered any alternative solutions or features?
+      placeholder: Describe alternatives you've considered
+    validations:
+      required: false
+
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope
+      description: What is in scope and out of scope for this feature?
+      placeholder: |
+        In scope:
+        - 
+        
+        Out of scope:
+        - 
+    validations:
+      required: false
+
+  - type: textarea
+    id: implementation
+    attributes:
+      label: Implementation Details
+      description: Do you have any ideas about how this could be implemented?
+      placeholder: Technical details, APIs, dependencies, etc.
+    validations:
+      required: false
+
+  - type: textarea
+    id: risks
+    attributes:
+      label: Potential Risks or Concerns
+      description: Are there any potential risks, breaking changes, or concerns?
+      placeholder: Performance impacts, breaking changes, security concerns, etc.
+    validations:
+      required: false
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      description: How important is this feature to you?
+      options:
+        - Critical (blocking my work)
+        - High (very important)
+        - Medium (nice to have)
+        - Low (not urgent)
+    validations:
+      required: true
+
+  - type: dropdown
+    id: component
+    attributes:
+      label: Component
+      description: Which part of RAGbot does this feature relate to?
+      options:
+        - Frontend (UI/UX)
+        - Backend (API/Server)
+        - RAG Pipeline
+        - LLM Integration
+        - Documentation
+        - DevOps/Infrastructure
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: use-case
+    attributes:
+      label: Use Case
+      description: Describe a specific use case or scenario where this feature would be useful
+      placeholder: When I..., I want to..., so that...
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Context
+      description: Add any other context, mockups, or screenshots about the feature request
+      placeholder: Any additional information that might be helpful
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Pre-submission Checklist
+      description: Please confirm the following before submitting
+      options:
+        - label: I have searched existing issues and feature requests to avoid duplicates
+          required: true
+        - label: I have provided sufficient detail for this feature request
+          required: true
+        - label: This feature aligns with the goals and scope of RAGbot
+          required: false

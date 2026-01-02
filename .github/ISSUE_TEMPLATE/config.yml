@@ -1,0 +1,17 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 💬 GitHub Discussions
+    url: https://github.com/H0NEYP0T-466/RAGbot/discussions
+    about: Have a question or want to discuss ideas? Start a discussion here!
+  
+  - name: 🛡️ Security Vulnerability
+    url: https://github.com/H0NEYP0T-466/RAGbot/security/advisories/new
+    about: Please report security vulnerabilities privately through our Security Advisory system.
+  
+  - name: 📖 Documentation
+    url: https://github.com/H0NEYP0T-466/RAGbot/blob/main/README.md
+    about: Check out our documentation for guides and examples.
+  
+  - name: ❓ Q&A and Support
+    url: https://github.com/H0NEYP0T-466/RAGbot/discussions/categories/q-a
+    about: Get help with using RAGbot or ask questions in our Q&A discussions.
