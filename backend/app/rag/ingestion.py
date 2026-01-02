@@ -395,11 +395,19 @@ class DocumentIngestion:
         
         size_str = f"{total_size / (1024 * 1024):.2f} MB"
         
+        # Get file type breakdown
+        files = self.scan_data_folder()
+        file_types = {}
+        for file_info in files:
+            file_type = file_info["type"]
+            file_types[file_type] = file_types.get(file_type, 0) + 1
+        
         return {
             "total_documents": self._documents_count,
             "total_chunks": collection_stats.get("total_chunks", 0),
             "vector_db_size": size_str,
-            "last_indexed": self._last_indexed.isoformat() if self._last_indexed else "Never"
+            "last_indexed": self._last_indexed.isoformat() if self._last_indexed else "Never",
+            "files_by_type": file_types
         }
 
 

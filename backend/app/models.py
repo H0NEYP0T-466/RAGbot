@@ -50,6 +50,7 @@ class StatsResponse(BaseModel):
     total_chunks: int = Field(..., description="Total chunks")
     vector_db_size: str = Field(..., description="Vector database size")
     last_indexed: str = Field(..., description="Last indexed timestamp")
+    files_by_type: dict[str, int] = Field(default_factory=dict, description="File count by type")
 
 
 class ErrorResponse(BaseModel):
