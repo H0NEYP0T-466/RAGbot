@@ -1,6 +1,7 @@
 """Document loading, chunking, and embedding ingestion."""
 
 import os
+import traceback
 from datetime import datetime
 from pathlib import Path
 from typing import Optional
@@ -54,7 +55,6 @@ class DocumentIngestion:
             return documents
         except Exception as e:
             logger.error(f"Failed to load PDF {file_path}: {str(e)}")
-            import traceback
             logger.error(f"PDF loading traceback: {traceback.format_exc()}")
             return []
     
