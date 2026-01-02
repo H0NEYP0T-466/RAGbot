@@ -3,6 +3,7 @@ uvicorn[standard]==0.27.0
 python-dotenv==1.0.0
 langchain>=0.2.0
 langchain-community>=0.2.0
+langsmith>=0.1.63
 faiss-cpu==1.8.0
 sentence-transformers==2.3.1
 pypdf==4.0.1
