@@ -76,6 +76,7 @@ class DocumentIngestion:
             return documents
         except Exception as e:
             logger.error(f"Failed to load Markdown {file_path}: {str(e)}")
+            logger.error(f"Markdown loading traceback: {traceback.format_exc()}")
             return []
     
     def _load_docx(self, file_path: str) -> list:
@@ -96,6 +97,7 @@ class DocumentIngestion:
             return documents
         except Exception as e:
             logger.error(f"Failed to load DOCX {file_path}: {str(e)}")
+            logger.error(f"DOCX loading traceback: {traceback.format_exc()}")
             return []
     
     def _load_text(self, file_path: str) -> list:
@@ -116,6 +118,7 @@ class DocumentIngestion:
             return documents
         except Exception as e:
             logger.error(f"Failed to load text {file_path}: {str(e)}")
+            logger.error(f"Text loading traceback: {traceback.format_exc()}")
             return []
     
     def scan_data_folder(self) -> list[dict]:
