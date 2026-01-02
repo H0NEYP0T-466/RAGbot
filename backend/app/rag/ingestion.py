@@ -1,6 +1,7 @@
 """Document loading, chunking, and embedding ingestion."""
 
 import os
+import traceback
 from datetime import datetime
 from pathlib import Path
 from typing import Optional
@@ -41,14 +42,20 @@ class DocumentIngestion:
             loader = PyPDFLoader(file_path)
             documents = loader.load()
             
+            if not documents:
+                logger.warning(f"PDF loaded but contains no pages: {file_path}")
+                return []
+            
             # Add source metadata
             for doc in documents:
                 doc.metadata["source"] = os.path.basename(file_path)
                 doc.metadata["file_type"] = "pdf"
             
+            logger.info(f"Successfully loaded PDF: {os.path.basename(file_path)} ({len(documents)} pages)")
             return documents
         except Exception as e:
             logger.error(f"Failed to load PDF {file_path}: {str(e)}")
+            logger.error(f"PDF loading traceback: {traceback.format_exc()}")
             return []
     
     def _load_markdown(self, file_path: str) -> list:
@@ -56,6 +63,10 @@ class DocumentIngestion:
         try:
             loader = TextLoader(file_path, encoding="utf-8")
             documents = loader.load()
+            
+            if not documents:
+                logger.warning(f"Markdown file loaded but contains no content: {file_path}")
+                return []
             
             # Add source metadata
             for doc in documents:
@@ -65,6 +76,7 @@ class DocumentIngestion:
             return documents
         except Exception as e:
             logger.error(f"Failed to load Markdown {file_path}: {str(e)}")
+            logger.error(f"Markdown loading traceback: {traceback.format_exc()}")
             return []
     
     def _load_docx(self, file_path: str) -> list:
@@ -72,6 +84,10 @@ class DocumentIngestion:
         try:
             loader = UnstructuredWordDocumentLoader(file_path)
             documents = loader.load()
+            
+            if not documents:
+                logger.warning(f"DOCX file loaded but contains no content: {file_path}")
+                return []
             
             # Add source metadata
             for doc in documents:
@@ -81,6 +97,7 @@ class DocumentIngestion:
             return documents
         except Exception as e:
             logger.error(f"Failed to load DOCX {file_path}: {str(e)}")
+            logger.error(f"DOCX loading traceback: {traceback.format_exc()}")
             return []
     
     def _load_text(self, file_path: str) -> list:
@@ -88,6 +105,10 @@ class DocumentIngestion:
         try:
             loader = TextLoader(file_path, encoding="utf-8")
             documents = loader.load()
+            
+            if not documents:
+                logger.warning(f"Text file loaded but contains no content: {file_path}")
+                return []
             
             # Add source metadata
             for doc in documents:
@@ -97,6 +118,7 @@ class DocumentIngestion:
             return documents
         except Exception as e:
             logger.error(f"Failed to load text {file_path}: {str(e)}")
+            logger.error(f"Text loading traceback: {traceback.format_exc()}")
             return []
     
     def scan_data_folder(self) -> list[dict]:
@@ -163,11 +185,33 @@ class DocumentIngestion:
                     stats = self.vectorstore_manager.get_collection_stats()
                     chunks_count = stats.get("total_chunks", 0)
                     
-                    # Count documents in data folder
+                    # Count documents in data folder by type
                     files = self.scan_data_folder()
                     self._documents_count = len(files)
                     
-                    logger.info(f"Loaded existing index: {self._documents_count} documents, {chunks_count} chunks")
+                    # Count files by type for diagnostics
+                    file_types = {}
+                    for file_info in files:
+                        file_type = file_info["type"]
+                        file_types[file_type] = file_types.get(file_type, 0) + 1
+                    
+                    logger.info(f"Loaded existing index: {self._documents_count} files in data folder, {chunks_count} chunks in index")
+                    
+                    # Show breakdown by file type
+                    if file_types:
+                        type_summary = ", ".join([f"{count} {ftype}" for ftype, count in sorted(file_types.items())])
+                        logger.info(f"Files in data folder: {type_summary}")
+                    
+                    # Warning if no chunks but files exist
+                    if chunks_count == 0 and self._documents_count > 0:
+                        logger.warning("⚠️  Index has 0 chunks but data folder has files!")
+                        logger.warning("   This usually means documents failed to load during indexing.")
+                        logger.warning("   Use POST /reindex endpoint to re-index all documents.")
+                    
+                    # Helpful info about re-indexing
+                    if self._documents_count > 0:
+                        logger.info("ℹ️  To re-index all documents (e.g., if you added new files), call POST /reindex")
+                    
                     return self._documents_count, chunks_count
                 else:
                     logger.warning("Index file exists but failed to load. Will create new index.")
@@ -194,11 +238,21 @@ class DocumentIngestion:
             logger.warning("No documents found in data folder")
             return 0, 0
         
+        # Track loading statistics by file type
+        stats_by_type = {"pdf": {"total": 0, "loaded": 0, "failed": 0},
+                        "markdown": {"total": 0, "loaded": 0, "failed": 0},
+                        "text": {"total": 0, "loaded": 0, "failed": 0},
+                        "docx": {"total": 0, "loaded": 0, "failed": 0}}
+        
         # Load all documents
         all_documents = []
         
         for file_info in files:
             logger.log_document_found(file_info["name"], file_info["type"])
+            file_type = file_info["type"]
+            
+            if file_type in stats_by_type:
+                stats_by_type[file_type]["total"] += 1
             
             if file_info["type"] == "pdf":
                 docs = self._load_pdf(file_info["path"])
@@ -211,10 +265,29 @@ class DocumentIngestion:
             else:
                 continue
             
+            if docs and file_type in stats_by_type:
+                stats_by_type[file_type]["loaded"] += 1
+            elif file_type in stats_by_type:
+                stats_by_type[file_type]["failed"] += 1
+            
             all_documents.extend(docs)
         
+        # Log loading statistics
+        logger.info("")
+        logger.info("Document Loading Summary:")
+        for doc_type, stats in stats_by_type.items():
+            if stats["total"] > 0:
+                logger.info(f"  {doc_type.upper()}: {stats['loaded']}/{stats['total']} loaded successfully, {stats['failed']} failed")
+                if stats["failed"] > 0:
+                    logger.warning(f"  ⚠️  {stats['failed']} {doc_type.upper()} file(s) failed to load - check error messages above")
+        logger.info("")
+        
         if not all_documents:
-            logger.warning("No documents could be loaded")
+            logger.error("❌ CRITICAL: No documents could be loaded! Check error messages above.")
+            logger.error("Common issues:")
+            logger.error("  - PDF files might be corrupted or password-protected")
+            logger.error("  - Files might have incorrect extensions")
+            logger.error("  - Missing required dependencies (pypdf, python-docx, etc.)")
             return 0, 0
         
         # Split documents into chunks
@@ -325,11 +398,19 @@ class DocumentIngestion:
         
         size_str = f"{total_size / (1024 * 1024):.2f} MB"
         
+        # Get file type breakdown
+        files = self.scan_data_folder()
+        file_types = {}
+        for file_info in files:
+            file_type = file_info["type"]
+            file_types[file_type] = file_types.get(file_type, 0) + 1
+        
         return {
             "total_documents": self._documents_count,
             "total_chunks": collection_stats.get("total_chunks", 0),
             "vector_db_size": size_str,
-            "last_indexed": self._last_indexed.isoformat() if self._last_indexed else "Never"
+            "last_indexed": self._last_indexed.isoformat() if self._last_indexed else "Never",
+            "files_by_type": file_types
         }
 
 

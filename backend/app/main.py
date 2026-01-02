@@ -155,7 +155,7 @@ async def stats() -> StatsResponse:
     """
     Get detailed statistics about the RAG system.
     
-    Returns document counts, chunk counts, database size, and last indexing time.
+    Returns document counts, chunk counts, database size, last indexing time, and file type breakdown.
     """
     try:
         ingestion = get_document_ingestion()
@@ -165,7 +165,8 @@ async def stats() -> StatsResponse:
             total_documents=stats.get("total_documents", 0),
             total_chunks=stats.get("total_chunks", 0),
             vector_db_size=stats.get("vector_db_size", "0 MB"),
-            last_indexed=stats.get("last_indexed", "Never")
+            last_indexed=stats.get("last_indexed", "Never"),
+            files_by_type=stats.get("files_by_type", {})
         )
         
     except Exception as e:
