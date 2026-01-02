@@ -6,7 +6,11 @@ from pathlib import Path
 from typing import Optional
 
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain_community.document_loaders import PyPDFLoader, TextLoader
+from langchain_community.document_loaders import (
+    PyPDFLoader,
+    TextLoader,
+    UnstructuredWordDocumentLoader,
+)
 from langchain_community.vectorstores import FAISS
 
 from app.config import get_settings
@@ -63,6 +67,38 @@ class DocumentIngestion:
             logger.error(f"Failed to load Markdown {file_path}: {str(e)}")
             return []
     
+    def _load_docx(self, file_path: str) -> list:
+        """Load a Word document (.docx)."""
+        try:
+            loader = UnstructuredWordDocumentLoader(file_path)
+            documents = loader.load()
+            
+            # Add source metadata
+            for doc in documents:
+                doc.metadata["source"] = os.path.basename(file_path)
+                doc.metadata["file_type"] = "docx"
+            
+            return documents
+        except Exception as e:
+            logger.error(f"Failed to load DOCX {file_path}: {str(e)}")
+            return []
+    
+    def _load_text(self, file_path: str) -> list:
+        """Load a text document."""
+        try:
+            loader = TextLoader(file_path, encoding="utf-8")
+            documents = loader.load()
+            
+            # Add source metadata
+            for doc in documents:
+                doc.metadata["source"] = os.path.basename(file_path)
+                doc.metadata["file_type"] = "text"
+            
+            return documents
+        except Exception as e:
+            logger.error(f"Failed to load text {file_path}: {str(e)}")
+            return []
+    
     def scan_data_folder(self) -> list[dict]:
         """Scan the data folder for documents."""
         data_path = Path(self.settings.data_folder)
@@ -94,6 +130,12 @@ class DocumentIngestion:
                         "path": str(file_path),
                         "name": file_path.name,
                         "type": "text"
+                    })
+                elif suffix in [".docx", ".doc"]:
+                    found_files.append({
+                        "path": str(file_path),
+                        "name": file_path.name,
+                        "type": "docx"
                     })
         
         return found_files
@@ -162,7 +204,9 @@ class DocumentIngestion:
             elif file_info["type"] == "markdown":
                 docs = self._load_markdown(file_info["path"])
             elif file_info["type"] == "text":
-                docs = self._load_markdown(file_info["path"])  # Text files use same loader as markdown
+                docs = self._load_text(file_info["path"])
+            elif file_info["type"] == "docx":
+                docs = self._load_docx(file_info["path"])
             else:
                 continue
             
@@ -232,7 +276,9 @@ class DocumentIngestion:
         elif suffix == ".md":
             docs = self._load_markdown(file_path)
         elif suffix == ".txt":
-            docs = self._load_markdown(file_path)
+            docs = self._load_text(file_path)
+        elif suffix in [".docx", ".doc"]:
+            docs = self._load_docx(file_path)
         
         if not docs:
             logger.warning(f"No content loaded from {file_path}")

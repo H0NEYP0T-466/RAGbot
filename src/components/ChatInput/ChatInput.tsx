@@ -1,4 +1,4 @@
-import { useState, type FormEvent, type KeyboardEvent } from 'react';
+import { useState, useRef, type FormEvent, type KeyboardEvent } from 'react';
 import './ChatInput.css';
 
 interface ChatInputProps {
@@ -8,12 +8,17 @@ interface ChatInputProps {
 
 function ChatInput({ onSendMessage, disabled = false }: ChatInputProps) {
   const [message, setMessage] = useState('');
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     if (message.trim() && !disabled) {
       onSendMessage(message.trim());
       setMessage('');
+      // Reset textarea height after sending
+      if (textareaRef.current) {
+        textareaRef.current.style.height = 'auto';
+      }
     }
   };
 
@@ -35,6 +40,7 @@ function ChatInput({ onSendMessage, disabled = false }: ChatInputProps) {
     <form className="chat-input" onSubmit={handleSubmit}>
       <div className="input-container">
         <textarea
+          ref={textareaRef}
           value={message}
           onChange={handleInput}
           onKeyDown={handleKeyDown}

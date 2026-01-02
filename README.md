@@ -20,7 +20,7 @@ A production-ready **RAG (Retrieval-Augmented Generation) chatbot** with a ChatG
 - Free Sentence Transformers embeddings (all-MiniLM-L6-v2)
 - LongCat LLM integration via OpenAI-compatible API
 - Comprehensive server logging
-- PDF and Markdown document support
+- PDF, Markdown, Text, and Word document support (.pdf, .md, .txt, .docx, .doc)
 
 ## Quick Start
 
