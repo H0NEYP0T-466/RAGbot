@@ -34,7 +34,7 @@
 
 ## 🔗 Links
 
-- 🌐 **Demo**: *Coming Soon*
+- 🌐 **Demo**: [*TRY-HERE*](https://ra-gbot.vercel.app/)
 - 📖 **Documentation**: Available in this README
 - 🐛 **Issues**: [Report a bug](https://github.com/H0NEYP0T-466/RAGbot/issues)
 - 💡 **Contributing**: [Contribution Guide](CONTRIBUTING.md)
