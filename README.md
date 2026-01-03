@@ -2,27 +2,29 @@
 
 <p align="center">
 
-  <!-- Core -->
-  ![GitHub License](https://img.shields.io/github/license/H0NEYP0T-466/RAGbot?style=for-the-badge&color=brightgreen)
-  ![GitHub Stars](https://img.shields.io/github/stars/H0NEYP0T-466/RAGbot?style=for-the-badge&color=yellow)
-  ![GitHub Forks](https://img.shields.io/github/forks/H0NEYP0T-466/RAGbot?style=for-the-badge&color=blue)
-  ![GitHub Issues](https://img.shields.io/github/issues/H0NEYP0T-466/RAGbot?style=for-the-badge&color=red)
-  ![GitHub Pull Requests](https://img.shields.io/github/issues-pr/H0NEYP0T-466/RAGbot?style=for-the-badge&color=orange)
-  ![Contributions Welcome](https://img.shields.io/badge/Contributions-Welcome-brightgreen?style=for-the-badge)
+![GitHub License](https://img.shields.io/github/license/H0NEYP0T-466/RAGbot?style=for-the-badge&color=brightgreen)
+![GitHub Stars](https://img.shields.io/github/stars/H0NEYP0T-466/RAGbot?style=for-the-badge&color=yellow)
+![GitHub Forks](https://img.shields.io/github/forks/H0NEYP0T-466/RAGbot?style=for-the-badge&color=blue)
+![GitHub Issues](https://img.shields.io/github/issues/H0NEYP0T-466/RAGbot?style=for-the-badge&color=red)
+![GitHub Pull Requests](https://img.shields.io/github/issues-pr/H0NEYP0T-466/RAGbot?style=for-the-badge&color=orange)
+![Contributions Welcome](https://img.shields.io/badge/Contributions-Welcome-brightgreen?style=for-the-badge)
 
   <!-- Activity -->
-  ![Last Commit](https://img.shields.io/github/last-commit/H0NEYP0T-466/RAGbot?style=for-the-badge&color=purple)
-  ![Commit Activity](https://img.shields.io/github/commit-activity/m/H0NEYP0T-466/RAGbot?style=for-the-badge&color=teal)
-  ![Repo Size](https://img.shields.io/github/repo-size/H0NEYP0T-466/RAGbot?style=for-the-badge&color=blueviolet)
-  ![Code Size](https://img.shields.io/github/languages/code-size/H0NEYP0T-466/RAGbot?style=for-the-badge&color=indigo)
+
+![Last Commit](https://img.shields.io/github/last-commit/H0NEYP0T-466/RAGbot?style=for-the-badge&color=purple)
+![Commit Activity](https://img.shields.io/github/commit-activity/m/H0NEYP0T-466/RAGbot?style=for-the-badge&color=teal)
+![Repo Size](https://img.shields.io/github/repo-size/H0NEYP0T-466/RAGbot?style=for-the-badge&color=blueviolet)
+![Code Size](https://img.shields.io/github/languages/code-size/H0NEYP0T-466/RAGbot?style=for-the-badge&color=indigo)
 
   <!-- Languages -->
-  ![Top Language](https://img.shields.io/github/languages/top/H0NEYP0T-466/RAGbot?style=for-the-badge&color=critical)
-  ![Languages Count](https://img.shields.io/github/languages/count/H0NEYP0T-466/RAGbot?style=for-the-badge&color=success)
+
+![Top Language](https://img.shields.io/github/languages/top/H0NEYP0T-466/RAGbot?style=for-the-badge&color=critical)
+![Languages Count](https://img.shields.io/github/languages/count/H0NEYP0T-466/RAGbot?style=for-the-badge&color=success)
 
   <!-- Community -->
-  ![Documentation](https://img.shields.io/badge/Docs-Available-green?style=for-the-badge&logo=readthedocs&logoColor=white)
-  ![Open Source Love](https://img.shields.io/badge/Open%20Source-%E2%9D%A4-red?style=for-the-badge)
+
+![Documentation](https://img.shields.io/badge/Docs-Available-green?style=for-the-badge&logo=readthedocs&logoColor=white)
+![Open Source Love](https://img.shields.io/badge/Open%20Source-%E2%9D%A4-red?style=for-the-badge)
 
 </p>
 
@@ -34,7 +36,7 @@
 
 ## 🔗 Links
 
-- 🌐 **Demo**: [*RAGbot*](https://ra-gbot.vercel.app/)
+- 🌐 **Demo**: [_RAGbot_](https://ra-gbot.vercel.app/)
 - 📖 **Documentation**: Available in this README
 - 🐛 **Issues**: [Report a bug](https://github.com/H0NEYP0T-466/RAGbot/issues)
 - 💡 **Contributing**: [Contribution Guide](CONTRIBUTING.md)
@@ -64,6 +66,7 @@
 ## ✨ Features
 
 ### Frontend
+
 - 💬 Clean, ChatGPT-inspired chat interface
 - 📝 Full Markdown rendering with syntax-highlighted code blocks
 - ➗ LaTeX/Math formula support
@@ -72,6 +75,7 @@
 - 🎨 Responsive design with dark mode support
 
 ### Backend
+
 - 🚀 FastAPI with automatic document indexing
 - 🔍 RAG pipeline with FAISS vector database
 - 🤖 Free Sentence Transformers embeddings (all-MiniLM-L6-v2)
@@ -309,12 +313,12 @@ RAGbot/
 
 ## 🔌 API Endpoints
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `POST` | `/chat` | Send a message and receive an AI-generated response |
-| `POST` | `/reindex` | Manually trigger document re-indexing |
-| `GET` | `/health` | Check backend health status |
-| `GET` | `/stats` | Get system statistics and indexed document count |
+| Method | Endpoint   | Description                                         |
+| ------ | ---------- | --------------------------------------------------- |
+| `POST` | `/chat`    | Send a message and receive an AI-generated response |
+| `POST` | `/reindex` | Manually trigger document re-indexing               |
+| `GET`  | `/health`  | Check backend health status                         |
+| `GET`  | `/stats`   | Get system statistics and indexed document count    |
 
 ### Example Request
 
